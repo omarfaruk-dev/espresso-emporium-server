@@ -30,33 +30,46 @@ async function run() {
 
     // Get all coffees
     app.get('/coffees', async (req, res) => {
-        // const cursor = coffeesCollection.find();
-        // const result = await cursor.toArray();
-        const result = await coffeesCollection.find().toArray();
-        res.send(result);
+      // const cursor = coffeesCollection.find();
+      // const result = await cursor.toArray();
+      const result = await coffeesCollection.find().toArray();
+      res.send(result);
     })
 
     // Get a single coffee
     app.get('/coffees/:id', async (req, res) => {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const coffee = await coffeesCollection.findOne(query);
-        res.send(coffee);
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const coffee = await coffeesCollection.findOne(query);
+      res.send(coffee);
     })
 
-    app.post('/coffees', async (req, res) =>{
-        const newCoffee = req.body;
-        console.log(newCoffee);
-        const result = await coffeesCollection.insertOne(newCoffee);
-        res.send(result);
+    app.post('/coffees', async (req, res) => {
+      const newCoffee = req.body;
+      console.log(newCoffee);
+      const result = await coffeesCollection.insertOne(newCoffee);
+      res.send(result);
+    })
+
+    //update a coffee
+    app.put('/coffees/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true }; // Create new if doesn't exist
+      const updatedCoffee = req.body;
+      const updateDoc = {
+        $set: updatedCoffee
+      }
+      const result = await coffeesCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     })
 
     //delete a coffee
     app.delete('/coffees/:id', async (req, res) => {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const result = await coffeesCollection.deleteOne(query);
-        res.send(result);
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await coffeesCollection.deleteOne(query);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
@@ -73,10 +86,10 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Coffee is Cooking!');
-    })
+  res.send('Coffee is Cooking!');
+})
 
 
-    app.listen(port, () => {
-        console.log(`Server is running on port: ${port}`);
-    });
+app.listen(port, () => {
+  console.log(`Server is running on port: ${port}`);
+});
