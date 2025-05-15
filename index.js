@@ -27,6 +27,20 @@ async function run() {
     await client.connect();
 
     const coffeesCollection = client.db('coffeeDB').collection('coffees');
+    const contactsCollection = client.db('coffeeDB').collection('contacts');
+
+    // Create a contact
+    app.post('/contact', async (req, res) => {
+      const contactData = req.body; // expects name, email, message
+      console.log(contactData);
+      const result = await contactsCollection.insertOne(contactData);
+      res.send(result);
+    });
+    // Get all contacts
+    app.get('/contact', async (req, res) => {
+      const result = await contactsCollection.find().toArray();
+      res.send(result);
+    });
 
     // Get all coffees
     app.get('/coffees', async (req, res) => {
@@ -91,5 +105,5 @@ app.get('/', (req, res) => {
 
 
 app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
