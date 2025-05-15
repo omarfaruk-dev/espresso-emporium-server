@@ -41,6 +41,13 @@ async function run() {
       const result = await contactsCollection.find().toArray();
       res.send(result);
     });
+    // Get a single contact
+    app.get('/contact/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const contact = await contactsCollection.findOne(query);
+      res.send(contact);  
+    })
 
     // Get all coffees
     app.get('/coffees', async (req, res) => {
