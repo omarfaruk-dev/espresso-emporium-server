@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
+// const admin = require('./admin');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express();
@@ -28,6 +29,7 @@ async function run() {
 
     const coffeesCollection = client.db('coffeeDB').collection('coffees');
     const contactsCollection = client.db('coffeeDB').collection('contacts');
+    const usersCollection = client.db('coffeeDB').collection('users');
 
     // Create a contact
     app.post('/contact', async (req, res) => {
@@ -46,13 +48,82 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const contact = await contactsCollection.findOne(query);
-      res.send(contact);  
+      res.send(contact);
     })
+    //delete a contact
+    app.delete('/contact/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await contactsCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    // user related api start
+
+    //Get all users
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    })
+    //create a user
+    app.post('/users', async (req, res) => {
+      const userData = req.body; // expects name, email, message
+      const result = await usersCollection.insertOne(userData);
+      res.send(result);
+    });
+
+    //update a user
+    app.patch('/users', async(req, res)=>{
+      const {email, lastSignInTime} = req.body;
+      const filter = {email: email}
+      const updatedDoc = {
+        $set: {
+          lastSignInTime: lastSignInTime
+        }
+      }
+      const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+    //delete a user
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    //delete user from firebase
+    // Admin API to delete Firebase Auth user by UID
+    // app.delete('/admin/delete-firebase-user/:uid', async (req, res) => {
+    //   const uid = req.params.uid;
+
+    //   try {
+    //     await admin.auth().deleteUser(uid);
+    //     res.send({ success: true, message: `User with UID ${uid} deleted from Firebase.` });
+    //   } catch (error) {
+    //      console.error('❌ Error deleting Firebase user:', error);
+    //     console.error('Error deleting Firebase user:', error);
+    //     res.status(500).send({ success: false, error: error.message });
+    //   }
+    // });
+
+    /////////////////////////
+//     app.get('/test-user/:uid', async (req, res) => {
+//   try {
+//     const userRecord = await admin.auth().getUser(req.params.uid);
+//     res.send({ found: true, uid: userRecord.uid });
+//   } catch (error) {
+//     res.status(404).send({ found: false, error: error.message });
+//   }
+// });
+
+    ////////////////////////
+
+
 
     // Get all coffees
     app.get('/coffees', async (req, res) => {
-      // const cursor = coffeesCollection.find();
-      // const result = await cursor.toArray();
       const result = await coffeesCollection.find().toArray();
       res.send(result);
     })
